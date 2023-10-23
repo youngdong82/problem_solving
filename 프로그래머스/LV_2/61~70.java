@@ -323,5 +323,212 @@ class Solution {
         return (int) dp[n];
     }
 }
-//------------------------------------------------------------------------------ 2_67 
-//------------------------------------------------------------------------------ 2_68 
+//------------------------------------------------------------------------------ 2_67 [1차] 캐시 => 적절한 자료구조
+import java.util.*;
+
+class Solution {
+    public int solution(int cacheSize, String[] cities) {
+        int answer = 0;
+        if(cacheSize == 0){
+            return 5 * cities.length;
+        }
+        LinkedList<String> que = new LinkedList<>();
+        HashMap<String, Boolean> map = new HashMap<>();
+        for(String city: cities){
+            city = city.toUpperCase();
+            //que에 있니?
+            if(map.getOrDefault(city, false) == true){
+                //있어
+                answer++;
+                //que에 city 끌어올려, map은 건드릴 필요 없음
+                que.remove(city);
+                que.add(city);
+            }else{
+                //없어    
+                answer += 5;
+                if(map.size() == cacheSize){    // que 갯수확인
+                    // 꽉찼으면
+                    //que,map에 city 밀어넣기
+                    String popedCity = que.poll();
+                    que.add(city);
+                    map.remove(popedCity);
+                    map.put(city,true);
+                }else{
+                    // 빈자리 남았다면
+                    //que,map에 추가
+                    map.put(city,true);
+                    que.add(city);
+                }
+            }   
+        }
+        return answer;
+    }
+}
+//------------------------------------------------------------------------------ 2_68 튜플
+import java.util.*;
+
+class Solution {
+    public int[] solution(String s) {
+        //string을 ArrayList로 변경
+        ArrayList<ArrayList<Integer>> result = convertToIntArr(s);
+        //각 arr를 갯수dp 따라 sort
+        Collections.sort(result, (a,b) -> Integer.compare(a.size(), b.size()));
+        ArrayList<Integer> answer = new ArrayList<>();
+        for(int i=0; i<result.size(); i++){
+            ArrayList<Integer> now = result.get(i);
+            for(int j=0; j<now.size(); j++){
+                if(answer.indexOf(now.get(j)) < 0){ //  없다면
+                    answer.add(now.get(j));
+                }
+            }
+        }
+        
+        return answer.stream().mapToInt(e->e).toArray();
+    }
+    ArrayList<ArrayList<Integer>> convertToIntArr (String target){ 
+        ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+        ArrayList<Integer> tmpResult = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        for(int i=1; i<target.length()-1; i++){
+            char now = target.charAt(i);
+            if(now == '{'){
+                continue;
+            }else if(now == '}'){
+                //마지막 숫자 넣어주기
+                tmpResult.add(Integer.parseInt(sb.toString()));
+                sb.setLength(0); 
+            }else if(now == ','){
+                if(target.charAt(i-1) != '}'){
+                    //주변이 숫자일 경우
+                    tmpResult.add(Integer.parseInt(sb.toString()));
+                    sb.setLength(0); 
+                }else if(target.charAt(i-1) == '}'){
+                    //주변이 }{ 일경우
+                    result.add((ArrayList<Integer>) tmpResult.clone());  //  참조 문제 해결필요
+                    tmpResult.clear();
+                }
+            }else{
+                //숫자일 경우
+                sb.append(now);
+            }
+            if(i == target.length()-2){
+                result.add((ArrayList<Integer>)tmpResult.clone());  //  참조 문제 해결필요
+                tmpResult.clear();
+            }
+        }
+        return result;
+    }
+}
+//------------------------------------------------------------------------------ 2_69 [1차] 뉴스 클러스터링
+import java.util.*;
+
+class Solution {
+    public int solution(String str1, String str2) {
+        HashMap<String, Integer> str1Arr = devideStr(str1);
+        HashMap<String, Integer> str2Arr = devideStr(str2);
+        
+        return getJacad(str1Arr, str2Arr);
+    }
+    HashMap<String, Integer> devideStr(String target){
+        HashMap<String, Integer> result = new HashMap<>();
+        for(int i=0; i<target.length()-1; i++){
+            if(Character.isLetter(target.charAt(i)) && Character.isLetter(target.charAt(i+1)) ){
+                String now = "" + target.charAt(i) + target.charAt(i+1);
+                String lowNow = now.toLowerCase();
+                result.put(lowNow, result.getOrDefault(lowNow, 0) + 1);
+            }
+        }
+        return result;
+    }
+    int getJacad(HashMap<String, Integer> map1, HashMap<String, Integer> map2){
+        int and = 0;
+        //교집합
+        for(String key: map1.keySet()){
+            int min = Math.min(map1.get(key), map2.getOrDefault(key,0));
+            if(min > 0){
+                and+= min;
+            }
+        }
+        int or = 0;
+        //합집합
+        Set<String> keyset = new HashSet<>();
+        for(String key: map1.keySet()){
+            keyset.add(key);
+        }
+        for(String key: map2.keySet()){
+            keyset.add(key);
+        }
+        for(String key: keyset){
+            int max = Math.max(map1.getOrDefault(key,0), map2.getOrDefault(key,0));
+            if(max > 0){
+                or+= max;
+            }
+        }
+        if(or == 0){
+            return 65536;
+        }
+        return and*65536 /or;
+    }
+}
+//------------------------------------------------------------------------------ 2_70 k진수에서 소수 개수 구하기
+import java.util.*;
+
+
+class Solution {
+    public int solution(int n, int k) {
+        int answer = -1;
+        //진수변환
+        String afterConvert = Integer.toString(n, k);
+        String[] splited = afterConvert.split("0");
+        System.out.println(Arrays.toString(splited));
+        //소수찾기
+        
+        return findPrime(afterConvert);
+    }
+    int findPrime(String target){
+        ArrayList<String> list = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i<target.length(); i++){
+            if(i == target.length()-1){
+                if(target.charAt(i) == '0'){
+                    if(sb.length() >0){
+                        list.add(sb.toString());
+                        sb.setLength(0);
+                    }
+                }else{
+                    sb.append(target.charAt(i));
+                    list.add(sb.toString());
+                    sb.setLength(0);
+                }  
+            }else{
+                if(target.charAt(i) == '0'){
+                    if(sb.length() >0){
+                        list.add(sb.toString());
+                        sb.setLength(0);
+                    }
+                }else{
+                    sb.append(target.charAt(i));
+                }
+            }
+        }
+        System.out.println(list);
+        int cnt = 0;
+        for(String each: list){
+            if(isPrime(Long.parseLong(each))){
+                cnt++;
+            }
+        }
+        return cnt;
+    }
+    boolean isPrime(Long target){
+        if(target < 2){
+            return false;
+        }
+        for(int i=2; i< (int)(Math.sqrt(target)+1); i++){
+            if(target % i == 0){
+                return false;
+            }
+        }
+        return true;
+    }
+}
