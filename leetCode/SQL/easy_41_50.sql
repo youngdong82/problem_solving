@@ -62,9 +62,36 @@
     having unit >= 100
 
 
--- sql_easy_45 --------------------------------------------------------------- 
--- sql_easy_46 --------------------------------------------------------------- 
--- sql_easy_47 --------------------------------------------------------------- 
+-- sql_easy_45 --------------------------------------------------------------- 613. Shortest Distance in a Line
+    select MIN(ABS(p2.x - p1.x)) as shortest
+    from Point p1
+    cross join Point p2
+    where p1.x != p2.x
+
+
+-- sql_easy_46 --------------------------------------------------------------- 1693. Daily Leads and Partners
+    select date_id
+        , make_name
+        , COUNT(distinct lead_id) as unique_leads 
+        , COUNT(distinct partner_id) as unique_partners
+    from DailySales
+    group by date_id, make_name
+
+
+-- sql_easy_47 --------------------------------------------------------------- 597. Friend Requests I: Overall Acceptance Rate
+    select IFNULL(ROUND(sub2.num/sub1.num,2),0) as accept_rate
+    from (
+        select count(distinct sender_id, send_to_id ) as num
+        from FriendRequest 
+    ) sub1
+    cross join
+    (
+        select count(distinct requester_id,accepter_id) as num
+        from RequestAccepted
+    ) sub2
+
+
+
 -- sql_easy_48 --------------------------------------------------------------- 
 -- sql_easy_49 --------------------------------------------------------------- 
 -- sql_easy_50 --------------------------------------------------------------- 
