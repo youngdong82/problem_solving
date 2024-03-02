@@ -162,7 +162,29 @@ class Solution {
 
 
 // bfs_easy_17 --------------------------------------------------------------- 783. Minimum Distance Between BST Nodes
-
+class Solution {
+    public int minDiffInBST(TreeNode root) {
+        ArrayList<Integer> list = new ArrayList<>();
+        Deque<TreeNode> que = new ArrayDeque();
+        que.add(root);
+        while(!que.isEmpty()){
+            TreeNode now = que.poll();
+            list.add(now.val);
+            if(now.left != null){
+                que.add(now.left);
+            }
+            if(now.right != null){
+                que.add(now.right);
+            }
+        }
+        Collections.sort(list);
+        int diff = Integer.MAX_VALUE;
+        for(int i=1; i<list.size(); i++){
+            diff = Math.min(diff, list.get(i) - list.get(i-1));
+        }
+        return diff;
+    }
+}
 
 
 // bfs_easy_18 --------------------------------------------------------------- 965. Univalued Binary Tree
