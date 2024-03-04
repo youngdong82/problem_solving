@@ -62,7 +62,64 @@
     )
 
 
--- sql_medium_07 --------------------------------------------------------------- 
--- sql_medium_08 --------------------------------------------------------------- 
--- sql_medium_09 --------------------------------------------------------------- 
--- sql_medium_10 --------------------------------------------------------------- 
+-- sql_medium_07 --------------------------------------------------------------- 1045. Customers Who Bought All Products
+-- 1.
+with subQuery as (
+    select COUNT(product_key) as cnt
+    from Product
+)
+
+select c.customer_id
+from Customer c
+join subQuery 
+group by c.customer_id
+HAVING COUNT(distinct c.product_key) = (select cnt from subQuery)
+
+-- 2.
+select c.customer_id
+from Customer c
+group by c.customer_id
+HAVING COUNT(distinct c.product_key) = (select COUNT(product_key) from Product)
+
+
+-- sql_medium_08 --------------------------------------------------------------- 180. Consecutive Numbers
+select distinct l1.num as ConsecutiveNums
+from Logs l1
+join Logs l2
+join Logs l3
+where   (l3.num = l2.num and (l3.id-l2.id) = 1)
+    and (l2.num = l1.num and (l2.id-l1.id) = 1)
+
+
+-- sql_medium_09 --------------------------------------------------------------- 1164. Product Price at a Given Date
+select product_id
+    ,  new_price as price 
+from Products 
+where (product_id,change_date) in (
+    select product_id , max(change_date) as date 
+    from Products
+    where change_date <='2019-08-16' 
+    group by product_id
+)
+union all
+
+select distinct product_id
+    ,  10 as price 
+from Products 
+where product_id not in(
+    select distinct product_id 
+    from Products 
+    where change_date <='2019-08-16' 
+    )
+
+
+-- sql_medium_10 --------------------------------------------------------------- 1204. Last Person to Fit in the Bus
+select person_name 
+from (  
+    select person_name
+        ,  sum(weight) over(order by turn) as cum_sum
+    from queue
+) as increase
+where cum_sum <= 1000
+order by cum_sum desc
+limit 1
