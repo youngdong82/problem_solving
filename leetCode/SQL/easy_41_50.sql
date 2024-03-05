@@ -92,6 +92,40 @@
 
 
 
--- sql_easy_48 --------------------------------------------------------------- 
--- sql_easy_49 --------------------------------------------------------------- 
+-- sql_easy_48 --------------------------------------------------------------- 1082. Sales Analysis I
+-- 1.
+with sales_amount_table as(
+    select seller_id
+        ,   SUM(price) as sales_amount
+    from Sales 
+    group by seller_id
+)
+
+select seller_id
+from sales_amount_table
+where sales_amount  = (
+    select MAX(sales_amount) from sales_amount_table
+)
+
+-- 2.
+SELECT seller_id
+FROM (
+    SELECT
+        seller_id,
+        RANK()OVER(ORDER BY SUM(price)DESC) AS rk
+    FROM Sales
+    GROUP BY 1
+    ) S
+WHERE rk=1
+
+
+-- sql_easy_49 --------------------------------------------------------------- 1069. Product Sales Analysis II
+select s.product_id
+    ,   SUM(s.quantity) as total_quantity 
+from Sales s
+left join Product p
+on s.product_id = p.product_id
+group by s.product_id
+
+
 -- sql_easy_50 --------------------------------------------------------------- 
