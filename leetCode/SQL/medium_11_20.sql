@@ -93,9 +93,73 @@ select
 from seat
 order by id;
 
--- sql_medium_13 --------------------------------------------------------------- 
--- sql_medium_14 --------------------------------------------------------------- 
--- sql_medium_15 --------------------------------------------------------------- 
+
+-- sql_medium_13 --------------------------------------------------------------- 1341. Movie Rating
+with all_join as (
+    select  u.name
+        ,   m.title
+        ,   mr.rating
+        ,   mr.created_at
+    from MovieRating mr
+    left join Users u
+    on mr.user_id = u.user_id
+    left join Movies m
+    on mr.movie_id = m.movie_id
+)
+
+(select name as results
+from all_join
+group by name
+order by COUNT(title) desc, name
+limit 1)
+
+union all
+
+(select title as results
+from all_join
+where created_at >= '2020-02-01'
+and created_at < '2020-03-01'
+group by title
+order by AVG(rating) desc, title
+limit 1)
+
+
+-- sql_medium_14 --------------------------------------------------------------- 1321. Restaurant Growth
+with cumulative_table as(
+    select customer_id 
+        , visited_on
+        , SUM(1) over(order by visited_on) as idx
+        , sum(amount) as sum_amount
+        , SUM(sum(amount)) over(ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) as cumulative_sum
+    from Customer 
+    group by visited_on
+    order by visited_on 
+)
+
+select visited_on
+    ,   cumulative_sum as amount
+    , ROUND(cumulative_sum/7,2) as average_amount 
+from cumulative_table
+where idx >= 7
+
+
+-- sql_medium_15 --------------------------------------------------------------- 602. Friend Requests II: Who Has the Most Friends
+with id_table as(
+    select requester_id as id
+    from RequestAccepted
+    union all
+    select accepter_id as id
+    from RequestAccepted
+)
+
+select id
+    ,   count(id) as num
+from id_table
+group by id
+order by num desc
+limit 1
+
+
 -- sql_medium_16 --------------------------------------------------------------- 
 -- sql_medium_17 --------------------------------------------------------------- 
 -- sql_medium_18 --------------------------------------------------------------- 
