@@ -160,8 +160,68 @@ order by num desc
 limit 1
 
 
--- sql_medium_16 --------------------------------------------------------------- 
--- sql_medium_17 --------------------------------------------------------------- 
+-- sql_medium_16 --------------------------------------------------------------- 585. Investments in 2016
+-- 1.
+with unique_loacation as(
+    select *
+    from Insurance
+    group by lat, lon
+    having count(pid) = 1
+), same_2015 as(
+    select * 
+    from Insurance
+    group by tiv_2015
+    having count(tiv_2015) > 1
+)
+
+    select ROUND(SUM(ul.tiv_2016),2) as tiv_2016 
+    from unique_loacation ul
+    left join same_2015 s
+    on ul.tiv_2015 = s.tiv_2015
+    where s.tiv_2015 is not null
+
+
+-- 2.
+SELECT ROUND(SUM(tiv_2016), 2) tiv_2016
+FROM insurance
+WHERE (tiv_2015 IN (SELECT tiv_2015
+                    FROM insurance
+                    GROUP BY 1
+                    HAVING COUNT(tiv_2015) > 1))
+    AND ((lat, lon) IN (SELECT lat, lon
+                        FROM insurance
+                        GROUP BY 1, 2
+                        HAVING COUNT(*) = 1))
+
+-- sql_medium_17 --------------------------------------------------------------- 176. Second Highest Salary
+-- 1. 내꺼;;
+select (case when count(id) > 0 then salary else null end )as SecondHighestSalary 
+from (
+    select *
+    , rank()over(order by salary desc) as rnk
+    from Employee
+) rank_table
+where rnk != 1
+limit 1
+
+-- 2. limit, offset 사용
+select (
+    select distinct salary    
+    from Employee 
+    order by salary desc 
+    limit 1 offset 1 
+) as SecondHighestSalary
+
+-- 3. 이것도 똑똑하고 간단한 느낌
+select max(E.salary) as SecondHighestSalary
+from Employee E
+where E.salary < (
+    select max(E.salary) 
+    from Employee E
+    )
+limit 1;
+
+
 -- sql_medium_18 --------------------------------------------------------------- 
 -- sql_medium_19 --------------------------------------------------------------- 
 -- sql_medium_20 --------------------------------------------------------------- 
