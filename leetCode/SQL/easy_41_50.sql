@@ -135,25 +135,3 @@ from Actions
 where action_date = '2019-07-04'
 and action = 'report'
 group by extra  
-
-
--- sql_easy_51 --------------------------------------------------------------- 512. Game Play Analysis II
-select player_id, device_id 
-from Activity 
-where (player_id, event_date) in (select player_id
-    ,   MIN(event_date)  as event_date
-from Activity
-group by player_id) 
-
-
-
--- sql_easy_52 --------------------------------------------------------------- 1076. Project Employees II
-select project_id
-from Project
-group by project_id
-having COUNT(employee_id) = (
-    select COUNT(employee_id) cnt
-    from Project 
-    group by project_id
-    order by cnt desc
-    limit 1)
