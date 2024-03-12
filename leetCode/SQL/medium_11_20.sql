@@ -222,6 +222,62 @@ where E.salary < (
 limit 1;
 
 
--- sql_medium_18 --------------------------------------------------------------- 
--- sql_medium_19 --------------------------------------------------------------- 
--- sql_medium_20 --------------------------------------------------------------- 
+-- sql_medium_18 --------------------------------------------------------------- 1158. Market Analysis I
+-- 1.
+with cnt as (
+    select o.order_date, u.user_id, u.join_date
+    from Orders o
+    left join Users u
+    on o.buyer_id = u.user_id
+), cnt2 as (
+    select cnt.user_id as buyer_id 
+        ,  join_date
+        , COUNT(order_date) as orders_in_2019 
+    from cnt
+    where cnt.order_date >= '2019-01-01'
+    group by cnt.user_id
+)
+
+select u.user_id as buyer_id 
+    ,   u.join_date
+    ,   IFNULL(cnt2.orders_in_2019 ,0) as orders_in_2019 
+from Users u
+left join cnt2
+on u.user_id = cnt2.buyer_id
+
+
+-- 2.
+-- left join on 조건1 and 조건2
+-- 거의 where 처럼 사용했음
+-- where과 다른 점은 where은 해당 값이 없으면 없애버리지만
+-- 얘는 null처리함
+    select u.user_id AS buyer_id
+        ,   u.join_date
+        ,   COUNT(o.order_id) AS orders_in_2019 
+    from Users u
+    left join Orders o
+    on o.buyer_id = u.user_id
+    and YEAR(o.order_date) = '2019'
+    group by u.user_id
+
+
+-- sql_medium_19 --------------------------------------------------------------- 184. Department Highest Salary
+select d.name as Department
+    ,   sub.name as Employee
+    ,   sub.salary as Salary
+from (
+    select *
+    , rank() over(partition by departmentId order by salary desc) as rnk
+    from Employee 
+) sub
+left join Department d
+on sub.departmentId = d.id
+where sub.rnk = 1
+
+
+
+-- sql_medium_20 --------------------------------------------------------------- 178. Rank Scores
+select score
+, dense_rank() over(order by score desc) as 'rank'
+from Scores
+
